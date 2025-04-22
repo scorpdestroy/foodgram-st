@@ -1,17 +1,63 @@
-version: '3.3'
 services:
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=foodgram
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    container_name: foodgram-back
+    build:
+      context: ../backend
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        python manage.py load_ingredients &&
+        python manage.py collectstatic --noinput &&
+        gunicorn foodgram_backend.wsgi:application --bind 0.0.0.0:8000
+      "
+    volumes:
+      - ../backend:/app
+      - ../data:/data   
+    environment:
+      - SECRET_KEY=django-insecure-...your-secret-key...
+      - DEBUG=True
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/foodgram
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    depends_on:
+      - db
 
   frontend:
     container_name: foodgram-front
-    build: ../frontend
+    build:
+      context: ../frontend
+    command: npm run build
     volumes:
-      - ../frontend/:/app/result_build/
+      - ../frontend:/app
+    depends_on:
+      - backend
+
   nginx:
     container_name: foodgram-proxy
     image: nginx:1.25.4-alpine
     ports:
-      - "80:80"
+      - "8000:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ../frontend/build:/usr/share/nginx/html/
-      - ../docs/:/usr/share/nginx/html/api/docs/
+      # Конфиг nginx
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Собранная статическая часть React
+      - ../frontend/build:/usr/share/nginx/html:ro
+      # OpenAPI‑документация
+      - ../docs:/usr/share/nginx/html/api/docs:ro
+      # Медиа-файлы Django в отдельную директорию
+      - ../backend/media:/media-data:ro
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
