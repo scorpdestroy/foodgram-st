@@ -2,11 +2,11 @@ import base64
 import uuid
 from django.core.files.base import ContentFile
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from .models import (
-    Ingredient, Tag, Recipe, RecipeIngredient
+    Ingredient, Tag, Recipe, RecipeIngredient, Favorite, ShoppingCart
 )
-
 
 class Base64ImageField(serializers.ImageField):
     """
@@ -21,6 +21,69 @@ class Base64ImageField(serializers.ImageField):
             data = ContentFile(base64.b64decode(imgstr), name=file_name)
         return super().to_internal_value(data)
 
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    """Сериализатор для добавления рецепта в корзину."""
+    class Meta:
+        model = ShoppingCart
+        fields = ('user', 'recipe')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=['user', 'recipe'],
+                message='Рецепт уже в корзине'
+            )
+        ]
+
+    def create(self, validated_data):
+        return ShoppingCart.objects.create(**validated_data)
+
+
+class ShoppingCartDeleteSerializer(serializers.Serializer):
+    """Сериализатор для удаления рецепта из корзины."""
+    def validate(self, attrs):
+        user = self.context['request'].user
+        recipe = self.context['recipe']
+        try:
+            attrs['instance'] = ShoppingCart.objects.get(user=user, recipe=recipe)
+        except ShoppingCart.DoesNotExist:
+            raise serializers.ValidationError('Рецепт не в корзине')
+        return attrs
+
+    def save(self):
+        self.validated_data['instance'].delete()
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    """Сериализатор для добавления рецепта в избранное."""
+    class Meta:
+        model = Favorite
+        fields = ('user', 'recipe')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=['user', 'recipe'],
+                message='Рецепт уже в избранном'
+            )
+        ]
+
+    def create(self, validated_data):
+        return Favorite.objects.create(**validated_data)
+
+
+class FavoriteDeleteSerializer(serializers.Serializer):
+    """Сериализатор для удаления рецепта из избранного."""
+    def validate(self, attrs):
+        user = self.context['request'].user
+        recipe = self.context['recipe']
+        try:
+            attrs['instance'] = Favorite.objects.get(user=user, recipe=recipe)
+        except Favorite.DoesNotExist:
+            raise serializers.ValidationError('Рецепт не в избранном')
+        return attrs
+
+    def save(self):
+        # удаляем найденный Favorite
+        self.validated_data['instance'].delete()
+        return None
 
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -155,7 +218,11 @@ class RecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ingredients = validated_data.pop('recipe_ingredients', [])
         tags = validated_data.pop('tags', [])
-        recipe = Recipe.objects.create(**validated_data)
+        # Привязываем текущего пользователя как автора
+        recipe = Recipe.objects.create(
+            author=self.context['request'].user,
+            **validated_data
+        )
         recipe.tags.set(tags)
         self._create_ingredients(recipe, ingredients)
         return recipe

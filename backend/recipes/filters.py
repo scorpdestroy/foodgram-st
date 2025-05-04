@@ -1,6 +1,10 @@
-import django_filters
+from django_filters import rest_framework as filters
+from django.contrib.auth import get_user_model
 from .models import Recipe
 from rest_framework.filters import SearchFilter
+
+User = get_user_model()
+
 
 class NameSearchFilter(SearchFilter):
     """
@@ -8,21 +12,37 @@ class NameSearchFilter(SearchFilter):
     """
     search_param = 'name'
 
-class RecipeFilter(django_filters.FilterSet):
-    tags = django_filters.AllValuesMultipleFilter(
+    def get_search_fields(self, view, request):
+        return ['^name']
+
+
+class RecipeFilter(filters.FilterSet):
+    # ищем по слагам тэгов
+    tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug'
     )
-    author = django_filters.NumberFilter(field_name='author__id')
-    is_favorited = django_filters.BooleanFilter(
-        field_name='favorited__user', lookup_expr='exact'
+    # вместо NumberFilter используем ModelChoiceFilter для ForeignKey
+    author = filters.ModelChoiceFilter(
+        field_name='author',
+        queryset=User.objects.all()
     )
-    is_in_shopping_cart = django_filters.BooleanFilter(
-        field_name='in_carts__user', lookup_expr='exact'
+    # Boolean-фильтры из django_filters.rest_framework
+    # и привязка к методам для фильтрации по текущему пользователю
+    is_favorited = filters.BooleanFilter(
+        method='filter_favorited'
+    )
+    is_in_shopping_cart = filters.BooleanFilter(
+        method='filter_in_shopping_cart'
     )
 
     class Meta:
         model = Recipe
-        fields = ('tags', 'author', 'is_favorited', 'is_in_shopping_cart')
+        fields = (
+            'tags',
+            'author',
+            'is_favorited',
+            'is_in_shopping_cart',
+        )
 
     def filter_favorited(self, queryset, name, value):
         if value and self.request.user.is_authenticated:

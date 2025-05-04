@@ -24,6 +24,8 @@ services:
     volumes:
       - ../backend:/app
       - ../data:/data   
+    ports:
+      - "8000:8000"
     environment:
       - SECRET_KEY=django-insecure-...your-secret-key...
       - DEBUG=True
