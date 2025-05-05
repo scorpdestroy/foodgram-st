@@ -8,7 +8,7 @@ cd "$(dirname "$0")"
 
 # Выполнить очистку БД
 echo "==> Очистка базы данных..."
-bash ./../postman_collection/clear_db.sh
+#bash ./../postman_collection/clear_db.sh
 
 # Перейти в infra и запустить docker-compose
 echo "==> Запуск docker-compose с пересборкой..."

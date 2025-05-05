@@ -4,6 +4,8 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from djoser.views import UserViewSet as BaseUserViewSet
+from djoser.serializers import UserCreateSerializer
 
 from recipes.models import Subscription, Recipe
 from recipes.serializers import Base64ImageField
@@ -12,7 +14,6 @@ from recipes.pagination import LimitPageNumberPagination
 from .models import User
 from .serializers import (
     UserSerializer,
-    CustomUserCreateSerializer,
     SubscriptionSerializer,
     AvatarSerializer,
     RecipeShortSerializer
@@ -47,7 +48,7 @@ class UserViewSet(
 
     def get_serializer_class(self):
         if self.action == 'create':
-            return CustomUserCreateSerializer
+            return UserCreateSerializer
         return UserSerializer
 
     @action(detail=False, methods=('get',), url_path='me')
