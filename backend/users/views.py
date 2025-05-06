@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from djoser.views import UserViewSet as BaseUserViewSet
+from djoser.views import UserViewSet as DjoserUserViewSet
 from djoser.serializers import UserCreateSerializer
 
 from recipes.models import Subscription, Recipe
@@ -13,6 +14,8 @@ from recipes.pagination import LimitPageNumberPagination
 
 from .models import User
 from .serializers import (
+    SubscriptionCreateSerializer,
+    SubscriptionDeleteSerializer,
     UserSerializer,
     SubscriptionSerializer,
     AvatarSerializer,
@@ -20,20 +23,15 @@ from .serializers import (
 )
 
 
-class UserViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
-):
+class UserViewSet(DjoserUserViewSet):
     """
     Универсальный viewset для пользователей:
      - POST   /api/users/               → регистрация (create)
      - GET    /api/users/               → список (list) с пагинацией
-     - GET    /api/users/{pk}/          → детальный (retrieve)
+     - GET    /api/users/{id}/          → детальный (retrieve)
      - GET    /api/users/me/            → свой профиль
-     - POST   /api/users/{pk}/subscribe → подписаться
-     - DELETE /api/users/{pk}/subscribe → отписаться
+     - POST   /api/users/{id}/subscribe → подписаться
+     - DELETE /api/users/{id}/subscribe → отписаться
      - GET    /api/users/subscriptions/ → список своих подписок
      - PUT    /api/users/me/avatar/     → загрузить аватар
      - DELETE /api/users/me/avatar/     → удалить аватар
@@ -57,38 +55,27 @@ class UserViewSet(
         return Response(serializer.data)
 
     @action(detail=True, methods=('post', 'delete'), url_path='subscribe')
-    def subscribe(self, request, pk=None):
-        user = request.user
-        author = get_object_or_404(User, pk=pk)
-    
+    def subscribe(self, request, id=None):
+        # Сначала убеждаемся, что автор существует
+        author = get_object_or_404(User, pk=id)
+
         if request.method == 'POST':
-            if user == author:
-                return Response(
-                    {'errors': 'Нельзя подписаться на себя'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            sub, created = Subscription.objects.get_or_create(
-                user=user, author=author
+            serializer = SubscriptionCreateSerializer(
+                data={'author_id': author.id},
+                context={'request': request}
             )
-            if not created:
-                return Response(
-                    {'errors': 'Вы уже подписаны'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            serializer = SubscriptionSerializer(
-                sub, context={'request': request}
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+            serializer.is_valid(raise_exception=True)
+            sub = serializer.save()
+            out = SubscriptionSerializer(sub, context={'request': request}).data
+            return Response(out, status=status.HTTP_201_CREATED)
+
         # DELETE
-        deleted, _ = Subscription.objects.filter(
-            user=user, author=author
-        ).delete()
-        if not deleted:
-            return Response(
-                {'errors': 'Вы не были подписаны'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer = SubscriptionDeleteSerializer(
+            data={'author_id': author.id},
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -105,23 +92,19 @@ class UserViewSet(
     def set_avatar(self, request):
         user = request.user
         if request.method == 'PUT':
-            if not request.data.get('avatar'):
-                return Response(
-                    {'avatar': ['Это поле обязательно.']},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
             serializer = AvatarSerializer(
                 instance=user,
                 data=request.data,
-                partial=True,
                 context={'request': request}
             )
+            # Теперь обязательность поля avatar проверяется сериализатором
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
                 {'avatar': request.build_absolute_uri(user.avatar.url)},
                 status=status.HTTP_200_OK
             )
+
         # DELETE
         user.avatar.delete(save=False)
         user.avatar = None

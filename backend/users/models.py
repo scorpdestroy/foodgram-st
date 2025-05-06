@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import EmailValidator
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
 
@@ -16,6 +17,7 @@ class User(AbstractUser):
         max_length=150,
         unique=True,
         help_text='Уникальный никнейм для отображения в ссылках/UI.',
+        validators=[UnicodeUsernameValidator()],
     )
     first_name = models.CharField('Имя', max_length=150)
     last_name = models.CharField('Фамилия', max_length=150)
