@@ -42,3 +42,23 @@ jobs:
           cd backend
           python manage.py migrate
           python manage.py test
+
+      - name: Install Node.js (для newman)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install Newman
+        run: npm install -g newman
+      
+      - name: Run Postman tests
+        run: |
+          newman run postman_collection/foodgram.postman_collection.json \
+            --env-var "baseUrl=http://localhost:8000" \
+            --env-var "email=testuser@example.com" \
+            --env-var "username=testuser" \
+            --env-var "password=strongpassword123" \
+            --env-var "secondUserEmail=second@example.com" \
+            --env-var "secondUserUsername=seconduser" \
+            --env-var "thirdUserEmail=third@example.com" \
+            --env-var "thirdUserUsername=thirduser"
