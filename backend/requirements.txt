@@ -27,3 +27,4 @@ social-auth-core==4.5.6
 sqlparse==0.5.3
 urllib3==2.4.0
 django-cors-headers==4.0.0
+dj-database-url==2.1.0
