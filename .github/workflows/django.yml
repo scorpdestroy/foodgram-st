@@ -43,14 +43,26 @@ jobs:
           python manage.py migrate
           python manage.py test
 
+      - name: Start Django server
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/foodgram
+        run: |
+          cd backend
+          python manage.py migrate
+          python manage.py collectstatic --noinput
+          nohup python manage.py runserver 0.0.0.0:8000 &
+      
+      - name: Wait for server to start
+        run: sleep 10
+
       - name: Install Node.js (для newman)
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Install Newman
         run: npm install -g newman
-      
+
       - name: Run Postman tests
         run: |
           newman run postman_collection/foodgram.postman_collection.json \
