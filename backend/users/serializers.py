@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from recipes.models import Recipe, Subscription
-from recipes.serializers import Base64ImageField  # импорт только Base64ImageField
+from recipes.serializers import (
+    Base64ImageField,
+)  # импорт только Base64ImageField
 from rest_framework import serializers
 
 from .models import User
@@ -34,7 +36,9 @@ class UserSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if not request or request.user.is_anonymous:
             return False
-        return Subscription.objects.filter(user=request.user, author=obj).exists()
+        return Subscription.objects.filter(
+            user=request.user, author=obj
+        ).exists()
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
@@ -122,7 +126,9 @@ class SubscriptionDeleteSerializer(serializers.Serializer):
 
     def validate_author_id(self, value):
         user = self.context["request"].user
-        if not Subscription.objects.filter(user=user, author_id=value).exists():
+        if not Subscription.objects.filter(
+            user=user, author_id=value
+        ).exists():
             raise serializers.ValidationError("Вы не были подписаны")
         return value
 

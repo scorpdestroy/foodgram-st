@@ -5,7 +5,14 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from .models import Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
+from .models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
 
 
 class Base64ImageField(serializers.ImageField):
@@ -48,7 +55,9 @@ class ShoppingCartDeleteSerializer(serializers.Serializer):
         user = self.context["request"].user
         recipe = self.context["recipe"]
         try:
-            attrs["instance"] = ShoppingCart.objects.get(user=user, recipe=recipe)
+            attrs["instance"] = ShoppingCart.objects.get(
+                user=user, recipe=recipe
+            )
         except ShoppingCart.DoesNotExist:
             raise serializers.ValidationError("Рецепт не в корзине")
         return attrs
@@ -108,7 +117,9 @@ class TagSerializer(serializers.ModelSerializer):
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit"
+    )
 
     class Meta:
         model = RecipeIngredient
@@ -247,7 +258,9 @@ class RecipeSerializer(serializers.ModelSerializer):
             instance.tags.set(validated_data.pop("tags"))
         if "recipe_ingredients" in validated_data:
             instance.recipe_ingredients.all().delete()
-            self._create_ingredients(instance, validated_data.pop("recipe_ingredients"))
+            self._create_ingredients(
+                instance, validated_data.pop("recipe_ingredients")
+            )
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
@@ -255,7 +268,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         from users.serializers import UserSerializer
 
         # только автор остаётся «как есть»
-        rep["author"] = UserSerializer(instance.author, context=self.context).data
+        rep["author"] = UserSerializer(
+            instance.author, context=self.context
+        ).data
         # удаляем из вывода поля, которых нет в responseSchema
         rep.pop("tags", None)
         rep.pop("pub_date", None)

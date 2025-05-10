@@ -18,7 +18,9 @@ class Migration(migrations.Migration):
                 help_text="Уникальный никнейм для отображения в ссылках/UI.",
                 max_length=150,
                 unique=True,
-                validators=[django.contrib.auth.validators.UnicodeUsernameValidator()],
+                validators=[
+                    django.contrib.auth.validators.UnicodeUsernameValidator()
+                ],
                 verbose_name="Имя пользователя",
             ),
         ),

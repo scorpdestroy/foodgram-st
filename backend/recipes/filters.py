@@ -22,11 +22,15 @@ class RecipeFilter(filters.FilterSet):
     # ищем по слагам тэгов
     tags = filters.AllValuesMultipleFilter(field_name="tags__slug")
     # вместо NumberFilter используем ModelChoiceFilter для ForeignKey
-    author = filters.ModelChoiceFilter(field_name="author", queryset=User.objects.all())
+    author = filters.ModelChoiceFilter(
+        field_name="author", queryset=User.objects.all()
+    )
     # Boolean-фильтры из django_filters.rest_framework
     # и привязка к методам для фильтрации по текущему пользователю
     is_favorited = filters.BooleanFilter(method="filter_favorited")
-    is_in_shopping_cart = filters.BooleanFilter(method="filter_in_shopping_cart")
+    is_in_shopping_cart = filters.BooleanFilter(
+        method="filter_in_shopping_cart"
+    )
 
     class Meta:
         model = Recipe
