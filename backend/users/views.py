@@ -61,9 +61,7 @@ class UserViewSet(DjoserUserViewSet):
             )
             serializer.is_valid(raise_exception=True)
             sub = serializer.save()
-            out = SubscriptionSerializer(
-                sub, context={"request": request}
-            ).data
+            out = SubscriptionSerializer(sub, context={"request": request}).data
             return Response(out, status=status.HTTP_201_CREATED)
 
         # DELETE

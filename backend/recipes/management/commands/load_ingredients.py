@@ -30,7 +30,5 @@ class Command(BaseCommand):
             skipped += not is_created
 
         self.stdout.write(
-            self.style.SUCCESS(
-                f"Добавлено {created}, пропущено {skipped} (уже были)"
-            )
+            self.style.SUCCESS(f"Добавлено {created}, пропущено {skipped} (уже были)")
         )

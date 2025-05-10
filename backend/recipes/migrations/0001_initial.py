@@ -47,9 +47,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "measurement_unit",
-                    models.CharField(
-                        max_length=50, verbose_name="Ед. измерения"
-                    ),
+                    models.CharField(max_length=50, verbose_name="Ед. измерения"),
                 ),
             ],
             options={
@@ -76,17 +74,13 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "image",
-                    models.ImageField(
-                        upload_to="recipes/", verbose_name="Картинка"
-                    ),
+                    models.ImageField(upload_to="recipes/", verbose_name="Картинка"),
                 ),
                 ("text", models.TextField(verbose_name="Описание")),
                 (
                     "cooking_time",
                     models.PositiveSmallIntegerField(
-                        validators=[
-                            django.core.validators.MinValueValidator(1)
-                        ],
+                        validators=[django.core.validators.MinValueValidator(1)],
                         verbose_name="Время приготовления (мин.)",
                     ),
                 ),
@@ -118,9 +112,7 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     models.PositiveIntegerField(
-                        validators=[
-                            django.core.validators.MinValueValidator(1)
-                        ],
+                        validators=[django.core.validators.MinValueValidator(1)],
                         verbose_name="Количество",
                     ),
                 ),
@@ -195,9 +187,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "slug",
-                    models.SlugField(
-                        blank=True, unique=True, verbose_name="Слаг"
-                    ),
+                    models.SlugField(blank=True, unique=True, verbose_name="Слаг"),
                 ),
             ],
             options={

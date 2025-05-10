@@ -109,9 +109,7 @@ class RecipeIngredient(models.Model):
 
 
 class Favorite(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="favorites"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favorites")
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, related_name="favorited"
     )
@@ -143,9 +141,7 @@ class ShoppingCart(models.Model):
 
 
 class Subscription(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="subscriber"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="subscriber")
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="subscribing"
     )

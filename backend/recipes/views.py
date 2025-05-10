@@ -81,9 +81,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         Поле ответа называется "short-link".
         """
         recipe = self.get_object()
-        link = request.build_absolute_uri(
-            reverse("recipe-detail", args=[recipe.id])
-        )
+        link = request.build_absolute_uri(reverse("recipe-detail", args=[recipe.id]))
         return Response({"short-link": link}, status=status.HTTP_200_OK)
 
     @action(
@@ -102,9 +100,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            data = RecipeShortSerializer(
-                recipe, context={"request": request}
-            ).data
+            data = RecipeShortSerializer(recipe, context={"request": request}).data
             return Response(data, status=status.HTTP_201_CREATED)
 
         # DELETE
@@ -131,9 +127,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            data = RecipeShortSerializer(
-                recipe, context={"request": request}
-            ).data
+            data = RecipeShortSerializer(recipe, context={"request": request}).data
             return Response(data, status=status.HTTP_201_CREATED)
 
         # DELETE
@@ -144,9 +138,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(
-        detail=False, methods=("get",), permission_classes=(IsAuthenticated,)
-    )
+    @action(detail=False, methods=("get",), permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
         user = request.user
         qs = (
@@ -164,7 +156,5 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ]
         content = "\n".join(lines)
         response = HttpResponse(content, content_type="text/plain")
-        response["Content-Disposition"] = (
-            'attachment; filename="shopping_list.txt"'
-        )
+        response["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
         return response
