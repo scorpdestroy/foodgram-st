@@ -65,18 +65,3 @@ Foodgram — учебный проект «Продуктовый помощни
 | DEBUG          | False                                            | Прод ≠ локальный запуск |
 | DATABASE\_URL  | postgres\://postgres\:postgres\@db:5432/foodgram | DSN базы                |
 | ALLOWED\_HOSTS | localhost,127.0.0.1                              | Список хостов           |
-
----
-
-## 🧪 Тесты Postman
-
-Коллекция: `postman_collection/foodgram.postman_collection.json`
-
-```bash
-npm i -g newman
-newman run postman_collection/foodgram.postman_collection.json \
-  --env-var baseUrl=http://localhost
-```
-
-> ⚠️ Перед тестами убедись, что backend и nginx запущены и база чиста.
-> `postman_collection/clear_db.sh` очищает базу через Django management-команду
