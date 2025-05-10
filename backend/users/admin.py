@@ -6,6 +6,6 @@ from .models import User
 
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):
-    list_display = ('id', 'email', 'username', 'first_name', 'last_name')
-    search_fields = ('email', 'username')
-    ordering = ('id',)
+    list_display = ("id", "email", "username", "first_name", "last_name")
+    search_fields = ("email", "username")
+    ordering = ("id",)

@@ -8,92 +8,202 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Favorite',
+            name="Favorite",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'избранный рецепт',
-                'verbose_name_plural': 'избранные рецепты',
+                "verbose_name": "избранный рецепт",
+                "verbose_name_plural": "избранные рецепты",
             },
         ),
         migrations.CreateModel(
-            name='Ingredient',
+            name="Ingredient",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Название')),
-                ('measurement_unit', models.CharField(max_length=50, verbose_name='Ед. измерения')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(max_length=200, verbose_name="Название"),
+                ),
+                (
+                    "measurement_unit",
+                    models.CharField(
+                        max_length=50, verbose_name="Ед. измерения"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'ингредиент',
-                'verbose_name_plural': 'ингредиенты',
-                'ordering': ('name',),
+                "verbose_name": "ингредиент",
+                "verbose_name_plural": "ингредиенты",
+                "ordering": ("name",),
             },
         ),
         migrations.CreateModel(
-            name='Recipe',
+            name="Recipe",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Название')),
-                ('image', models.ImageField(upload_to='recipes/', verbose_name='Картинка')),
-                ('text', models.TextField(verbose_name='Описание')),
-                ('cooking_time', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Время приготовления (мин.)')),
-                ('pub_date', models.DateTimeField(auto_now_add=True, verbose_name='дата публикации')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(max_length=200, verbose_name="Название"),
+                ),
+                (
+                    "image",
+                    models.ImageField(
+                        upload_to="recipes/", verbose_name="Картинка"
+                    ),
+                ),
+                ("text", models.TextField(verbose_name="Описание")),
+                (
+                    "cooking_time",
+                    models.PositiveSmallIntegerField(
+                        validators=[
+                            django.core.validators.MinValueValidator(1)
+                        ],
+                        verbose_name="Время приготовления (мин.)",
+                    ),
+                ),
+                (
+                    "pub_date",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="дата публикации"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'рецепт',
-                'verbose_name_plural': 'рецепты',
-                'ordering': ('-pub_date',),
+                "verbose_name": "рецепт",
+                "verbose_name_plural": "рецепты",
+                "ordering": ("-pub_date",),
             },
         ),
         migrations.CreateModel(
-            name='RecipeIngredient',
+            name="RecipeIngredient",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Количество')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "amount",
+                    models.PositiveIntegerField(
+                        validators=[
+                            django.core.validators.MinValueValidator(1)
+                        ],
+                        verbose_name="Количество",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'ингредиент рецепта',
-                'verbose_name_plural': 'ингредиенты рецептов',
+                "verbose_name": "ингредиент рецепта",
+                "verbose_name_plural": "ингредиенты рецептов",
             },
         ),
         migrations.CreateModel(
-            name='ShoppingCart',
+            name="ShoppingCart",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'рецепт в списке покупок',
-                'verbose_name_plural': 'списки покупок',
+                "verbose_name": "рецепт в списке покупок",
+                "verbose_name_plural": "списки покупок",
             },
         ),
         migrations.CreateModel(
-            name='Subscription',
+            name="Subscription",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'подписка',
-                'verbose_name_plural': 'подписки',
+                "verbose_name": "подписка",
+                "verbose_name_plural": "подписки",
             },
         ),
         migrations.CreateModel(
-            name='Tag',
+            name="Tag",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, unique=True, verbose_name='Название')),
-                ('color', models.CharField(default='#49B64E', help_text='Напр.: #ff0000', max_length=7, verbose_name='Цвет HEX')),
-                ('slug', models.SlugField(blank=True, unique=True, verbose_name='Слаг')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=100, unique=True, verbose_name="Название"
+                    ),
+                ),
+                (
+                    "color",
+                    models.CharField(
+                        default="#49B64E",
+                        help_text="Напр.: #ff0000",
+                        max_length=7,
+                        verbose_name="Цвет HEX",
+                    ),
+                ),
+                (
+                    "slug",
+                    models.SlugField(
+                        blank=True, unique=True, verbose_name="Слаг"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'тег',
-                'verbose_name_plural': 'теги',
-                'ordering': ('name',),
+                "verbose_name": "тег",
+                "verbose_name_plural": "теги",
+                "ordering": ("name",),
             },
         ),
     ]
