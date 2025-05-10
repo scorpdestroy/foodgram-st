@@ -26,7 +26,7 @@ jobs:
 
       - name: Run linters
         run: |
-          black --check backend
+          black --line-length 79 --check backend
           flake8 backend
 
   build-and-push:
