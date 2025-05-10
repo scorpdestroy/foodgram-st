@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
 from recipes.models import Recipe, Subscription
-from recipes.serializers import \
-    Base64ImageField  # импорт только Base64ImageField
+from recipes.serializers import Base64ImageField  # импорт только Base64ImageField
 from rest_framework import serializers
 
 from .models import User

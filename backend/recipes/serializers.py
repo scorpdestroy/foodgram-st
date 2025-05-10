@@ -5,8 +5,7 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                     ShoppingCart, Tag)
+from .models import Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
 
 
 class Base64ImageField(serializers.ImageField):

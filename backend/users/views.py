@@ -9,9 +9,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import User
-from .serializers import (AvatarSerializer, SubscriptionCreateSerializer,
-                          SubscriptionDeleteSerializer, SubscriptionSerializer,
-                          UserSerializer)
+from .serializers import (
+    AvatarSerializer,
+    SubscriptionCreateSerializer,
+    SubscriptionDeleteSerializer,
+    SubscriptionSerializer,
+    UserSerializer,
+)
 
 
 class UserViewSet(DjoserUserViewSet):

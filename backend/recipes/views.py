@@ -4,16 +4,20 @@ from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import (AllowAny, BasePermission,
-                                        IsAuthenticated)
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
 from .filters import NameSearchFilter, RecipeFilter
 from .models import Ingredient, Recipe, RecipeIngredient
-from .serializers import (FavoriteDeleteSerializer, FavoriteSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          RecipeShortSerializer, ShoppingCartDeleteSerializer,
-                          ShoppingCartSerializer)
+from .serializers import (
+    FavoriteDeleteSerializer,
+    FavoriteSerializer,
+    IngredientSerializer,
+    RecipeSerializer,
+    RecipeShortSerializer,
+    ShoppingCartDeleteSerializer,
+    ShoppingCartSerializer,
+)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
