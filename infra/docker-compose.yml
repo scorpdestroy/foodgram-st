@@ -31,9 +31,9 @@ services:
       DATABASE_URL: postgres://postgres:postgres@db:5432/foodgram
       ALLOWED_HOSTS: localhost,127.0.0.1
     volumes:
-      - media_data:/app/media          
-      - static_data:/app/static        
-      - ../data:/data:ro               
+      - webroot:/app/static
+      - media_data:/app/media
+      - ../data:/data:ro
     depends_on:
       db:
         condition: service_healthy
@@ -43,9 +43,11 @@ services:
   frontend:
     image: scorpdestory/foodgram-front:latest
     entrypoint: >
-      sh -c "cp -a /usr/share/nginx/html/. /static && echo 'SPA copied';"
+      sh -c "
+        cp -a /usr/share/nginx/html/. /webroot && echo 'SPA copied';
+      "
     volumes:
-      - static_site:/static
+      - webroot:/webroot
     depends_on:
       - backend
     restart: "no"
@@ -57,11 +59,9 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro    
-      - static_site:/usr/share/nginx/html:ro              
-      - static_data:/usr/share/nginx/html/static:ro             
-      - media_data:/media-data:ro       
-      - ../docs:/docs:ro                  
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - webroot:/usr/share/nginx/html:ro
+      - media_data:/media-data:ro
     depends_on:
       - backend
       - frontend
@@ -69,5 +69,4 @@ services:
 volumes:
   postgres_data:
   media_data:
-  static_data:
-  static_site:
+  webroot:
