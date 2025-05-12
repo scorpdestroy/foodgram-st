@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
-from recipes.models import Recipe, Subscription
-from recipes.serializers import (
-    Base64ImageField,
-)  # импорт только Base64ImageField
+from recipes.models import Recipe
+from users.models import Subscription, User
+from recipes.serializers import RecipeShortSerializer
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from .models import User
@@ -39,15 +39,6 @@ class UserSerializer(serializers.ModelSerializer):
         return Subscription.objects.filter(
             user=request.user, author=obj
         ).exists()
-
-
-class RecipeShortSerializer(serializers.ModelSerializer):
-    """Короткое представление рецепта для подписок."""
-
-    class Meta:
-        model = Recipe
-        fields = ("id", "name", "image", "cooking_time")
-
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="author.id")
@@ -96,13 +87,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
-
-
-class SimpleUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("id", "username", "first_name", "last_name", "email")
-
 
 class SubscriptionCreateSerializer(serializers.Serializer):
     author_id = serializers.IntegerField(write_only=True)

@@ -2,45 +2,33 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.text import slugify
 from users.models import User
+from django.conf import settings
+from .constants import NAME_MAX_LENGTH, UNIT_MAX_LENGTH
 
 
 class Ingredient(models.Model):
-    name = models.CharField("Название", max_length=200)
-    measurement_unit = models.CharField("Ед. измерения", max_length=50)
+    name = models.CharField(
+        "Название",
+        max_length=NAME_MAX_LENGTH
+    )
+    measurement_unit = models.CharField(
+        "Ед. измерения",
+        max_length=UNIT_MAX_LENGTH
+    )
 
     class Meta:
         ordering = ("name",)
-        unique_together = ("name", "measurement_unit")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "measurement_unit"],
+                name="unique_ingredient"
+            )
+        ]
         verbose_name = "ингредиент"
         verbose_name_plural = "ингредиенты"
 
     def __str__(self):
         return f"{self.name} ({self.measurement_unit})"
-
-
-class Tag(models.Model):
-    name = models.CharField("Название", max_length=100, unique=True)
-    color = models.CharField(
-        "Цвет HEX",
-        max_length=7,
-        default="#49B64E",
-        help_text="Напр.: #ff0000",
-    )
-    slug = models.SlugField("Слаг", unique=True, blank=True)
-
-    class Meta:
-        ordering = ("name",)
-        verbose_name = "тег"
-        verbose_name_plural = "теги"
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name, allow_unicode=True)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
 
 class Recipe(models.Model):
     author = models.ForeignKey(
@@ -57,11 +45,6 @@ class Recipe(models.Model):
         through="RecipeIngredient",
         related_name="recipes",
         verbose_name="ингредиенты",
-    )
-    tags = models.ManyToManyField(
-        Tag,
-        related_name="recipes",
-        verbose_name="теги",
     )
     cooking_time = models.PositiveSmallIntegerField(
         "Время приготовления (мин.)",
@@ -91,7 +74,7 @@ class RecipeIngredient(models.Model):
         on_delete=models.CASCADE,
         related_name="ingredient_recipes",
     )
-    amount = models.PositiveIntegerField(
+    amount = models.PositiveSmallIntegerField(
         "Количество",
         validators=[MinValueValidator(1)],
     )
@@ -107,17 +90,44 @@ class RecipeIngredient(models.Model):
             f"{self.ingredient.measurement_unit}"
         )
 
-
-class Favorite(models.Model):
+class UserRecipeRelation(models.Model):
+    """
+    Абстрактная модель: связь пользователь - рецепт
+    Содержит только поля и единственный UniqueConstraint.
+    """
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="favorites"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
     )
     recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name="favorited"
+        'Recipe',
+        on_delete=models.CASCADE
     )
 
     class Meta:
-        unique_together = ("user", "recipe")
+        abstract = True
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_user_recipe'
+            )
+        ]
+
+
+class Favorite(UserRecipeRelation):
+    # Переопределяем related_name, чтобы вернуть recipe.favorited
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="favorites"
+    )
+    recipe = models.ForeignKey(
+        'Recipe',
+        on_delete=models.CASCADE,
+        related_name="favorited"
+    )
+
+    class Meta:
         verbose_name = "избранный рецепт"
         verbose_name_plural = "избранные рецепты"
 
@@ -125,35 +135,22 @@ class Favorite(models.Model):
         return f"{self.user} ♥ {self.recipe}"
 
 
-class ShoppingCart(models.Model):
+class ShoppingCart(UserRecipeRelation):
+    # Переопределяем related_name, чтобы вернуть recipe.in_carts
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="shopping_cart"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="shopping_cart"
     )
     recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name="in_carts"
+        'Recipe',
+        on_delete=models.CASCADE,
+        related_name="in_carts"
     )
 
     class Meta:
-        unique_together = ("user", "recipe")
         verbose_name = "рецепт в списке покупок"
         verbose_name_plural = "списки покупок"
 
     def __str__(self):
         return f"{self.user} → {self.recipe}"
-
-
-class Subscription(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="subscriber"
-    )
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="subscribing"
-    )
-
-    class Meta:
-        unique_together = ("user", "author")
-        verbose_name = "подписка"
-        verbose_name_plural = "подписки"
-
-    def __str__(self):
-        return f"{self.user} ← {self.author}"

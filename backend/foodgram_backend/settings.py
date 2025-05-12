@@ -136,18 +136,24 @@ SIMPLE_JWT = {
 DJOSER = {
     "LOGIN_FIELD": "email",
     "HIDE_USERS": False,
-    "DISABLE_ENDPOINTS": ["users_me"],
+
     "SERIALIZERS": {
-        "user": "users.serializers.UserSerializer",  # list/retrieve
-        "current_user": "users.serializers.UserSerializer",  # /users/me
+        "user_create": "djoser.serializers.UserCreateSerializer",
+        "user_list":   "users.serializers.UserSerializer",
+        "user":        "users.serializers.UserSerializer",
+        "current_user": "users.serializers.UserSerializer",
+        "user_avatar": "users.serializers.AvatarSerializer",
     },
+
     "PERMISSIONS": {
-        "user_list": ["rest_framework.permissions.AllowAny"],
-        "user": ["rest_framework.permissions.AllowAny"],
-        "user_create": ["rest_framework.permissions.AllowAny"],
-        "user_delete": ["rest_framework.permissions.IsAuthenticated"],
+        "user_list":    ["rest_framework.permissions.AllowAny"],
+        "user":         ["rest_framework.permissions.AllowAny"],
+        "user_create":  ["rest_framework.permissions.AllowAny"],
+        "user_delete":  ["rest_framework.permissions.IsAuthenticated"],
         "set_password": ["rest_framework.permissions.IsAuthenticated"],
-    },
+        "current_user": ["rest_framework.permissions.IsAuthenticated"],
+        "user_avatar":  ["rest_framework.permissions.IsAuthenticated"],
+    }
 }
 
 

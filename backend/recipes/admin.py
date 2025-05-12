@@ -6,10 +6,9 @@ from .models import (
     Recipe,
     RecipeIngredient,
     ShoppingCart,
-    Subscription,
-    Tag,
 )
 
+from users.models import Subscription
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
@@ -20,7 +19,7 @@ class RecipeIngredientInline(admin.TabularInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "author", "favorite_count")
-    list_filter = ("author", "tags")
+    list_filter = ("author",)
     search_fields = ("name", "author__username")
     inlines = (RecipeIngredientInline,)
 
@@ -35,7 +34,6 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
-admin.site.register(Tag)
 admin.site.register(RecipeIngredient)
 admin.site.register(Favorite)
 admin.site.register(ShoppingCart)

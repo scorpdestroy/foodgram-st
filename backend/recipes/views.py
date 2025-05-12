@@ -11,6 +11,7 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 
+from .permissions import IsAuthor
 from .filters import NameSearchFilter, RecipeFilter
 from .models import Ingredient, Recipe, RecipeIngredient
 from .serializers import (
@@ -36,21 +37,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny]
     filter_backends = (NameSearchFilter,)  # поиск по началу названия
+    search_fields = ["^name"]
     pagination_class = None
-
-
-class IsAuthor(BasePermission):
-    """
-    Разрешает небезопасные методы (PATCH/PUT/DELETE)
-    только если request.user == recipe.author.
-    """
-
-    def has_object_permission(self, request, view, obj):
-        # SAFE_METHODS (GET, HEAD, OPTIONS) всегда можно
-        if request.method in ("GET", "HEAD", "OPTIONS"):
-            return True
-        return obj.author == request.user
-
 
 class RecipeViewSet(viewsets.ModelViewSet):
 
@@ -86,34 +74,39 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         return Response({"short-link": link}, status=status.HTTP_200_OK)
 
+    def _toggle_relation(self, request, serializer_class, delete_serializer_class):
+        recipe = self.get_object()
+        user = request.user
+
+        if request.method == "POST":
+            serializer = serializer_class(
+                data={"user": user.id, "recipe": recipe.id},
+                context={"request": request},
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            data = RecipeShortSerializer(recipe, context={"request": request}).data
+            return Response(data, status=status.HTTP_201_CREATED)
+
+        # DELETE
+        serializer = delete_serializer_class(
+            data={}, context={"request": request, "recipe": recipe}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(
         detail=True,
         methods=("post", "delete"),
         permission_classes=(IsAuthenticated,),
     )
     def favorite(self, request, pk=None):
-        recipe = self.get_object()
-        user = request.user
-
-        if request.method == "POST":
-            serializer = FavoriteSerializer(
-                data={"user": user.id, "recipe": recipe.id},
-                context={"request": request},
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            data = RecipeShortSerializer(
-                recipe, context={"request": request}
-            ).data
-            return Response(data, status=status.HTTP_201_CREATED)
-
-        # DELETE
-        serializer = FavoriteDeleteSerializer(
-            data={}, context={"request": request, "recipe": recipe}
+        return self._toggle_relation(
+            request,
+            FavoriteSerializer,
+            FavoriteDeleteSerializer
         )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
@@ -121,28 +114,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def shopping_cart(self, request, pk=None):
-        recipe = self.get_object()
-        user = request.user
-
-        if request.method == "POST":
-            serializer = ShoppingCartSerializer(
-                data={"user": user.id, "recipe": recipe.id},
-                context={"request": request},
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            data = RecipeShortSerializer(
-                recipe, context={"request": request}
-            ).data
-            return Response(data, status=status.HTTP_201_CREATED)
-
-        # DELETE
-        serializer = ShoppingCartDeleteSerializer(
-            data={}, context={"request": request, "recipe": recipe}
+        return self._toggle_relation(
+            request,
+            ShoppingCartSerializer,
+            ShoppingCartDeleteSerializer
         )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False, methods=("get",), permission_classes=(IsAuthenticated,)

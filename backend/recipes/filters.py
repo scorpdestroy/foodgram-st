@@ -11,16 +11,11 @@ class NameSearchFilter(SearchFilter):
     """
     То же самое, что SearchFilter, но ищет по параметру ?name=
     """
-
     search_param = "name"
 
-    def get_search_fields(self, view, request):
-        return ["^name"]
-
+    search_fields = ["^name"]
 
 class RecipeFilter(filters.FilterSet):
-    # ищем по слагам тэгов
-    tags = filters.AllValuesMultipleFilter(field_name="tags__slug")
     # вместо NumberFilter используем ModelChoiceFilter для ForeignKey
     author = filters.ModelChoiceFilter(
         field_name="author", queryset=User.objects.all()
@@ -35,7 +30,6 @@ class RecipeFilter(filters.FilterSet):
     class Meta:
         model = Recipe
         fields = (
-            "tags",
             "author",
             "is_favorited",
             "is_in_shopping_cart",

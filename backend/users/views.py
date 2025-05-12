@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer
 from djoser.views import UserViewSet as DjoserUserViewSet
-from recipes.models import Subscription
+from .models import Subscription
 from recipes.pagination import LimitPageNumberPagination
 from rest_framework import status
 from rest_framework.decorators import action
@@ -24,7 +24,7 @@ class UserViewSet(DjoserUserViewSet):
      - POST   /api/users/               → регистрация (create)
      - GET    /api/users/               → список (list) с пагинацией
      - GET    /api/users/{id}/          → детальный (retrieve)
-     - GET    /api/users/me/            → свой профиль
+     - GET    /api/users/me/            → свой профиль (через Djoser)
      - POST   /api/users/{id}/subscribe → подписаться
      - DELETE /api/users/{id}/subscribe → отписаться
      - GET    /api/users/subscriptions/ → список своих подписок
@@ -40,16 +40,6 @@ class UserViewSet(DjoserUserViewSet):
             return [AllowAny()]
         return [IsAuthenticated()]
 
-    def get_serializer_class(self):
-        if self.action == "create":
-            return UserCreateSerializer
-        return UserSerializer
-
-    @action(detail=False, methods=("get",), url_path="me")
-    def me(self, request):
-        serializer = UserSerializer(request.user, context={"request": request})
-        return Response(serializer.data)
-
     @action(detail=True, methods=("post", "delete"), url_path="subscribe")
     def subscribe(self, request, id=None):
         # Сначала убеждаемся, что автор существует
@@ -61,9 +51,7 @@ class UserViewSet(DjoserUserViewSet):
             )
             serializer.is_valid(raise_exception=True)
             sub = serializer.save()
-            out = SubscriptionSerializer(
-                sub, context={"request": request}
-            ).data
+            out = SubscriptionSerializer(sub, context={"request": request}).data
             return Response(out, status=status.HTTP_201_CREATED)
 
         # DELETE
@@ -90,7 +78,6 @@ class UserViewSet(DjoserUserViewSet):
             serializer = AvatarSerializer(
                 instance=user, data=request.data, context={"request": request}
             )
-            # Теперь обязательность поля avatar проверяется сериализатором
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(

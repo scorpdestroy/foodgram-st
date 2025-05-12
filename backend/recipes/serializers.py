@@ -1,9 +1,6 @@
-import base64
-import uuid
-
-from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+from drf_extra_fields.fields import Base64ImageField
 
 from .models import (
     Favorite,
@@ -11,24 +8,7 @@ from .models import (
     Recipe,
     RecipeIngredient,
     ShoppingCart,
-    Tag,
 )
-
-
-class Base64ImageField(serializers.ImageField):
-    """
-    Принимает строку вида "data:image/png;base64,AAA..." и
-    преобразует её в файл.
-    """
-
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith("data:image"):
-            header, imgstr = data.split(";base64,")
-            ext = header.split("/")[-1]
-            file_name = f"{uuid.uuid4().hex[:10]}.{ext}"
-            data = ContentFile(base64.b64decode(imgstr), name=file_name)
-        return super().to_internal_value(data)
-
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления рецепта в корзину."""
@@ -107,13 +87,6 @@ class IngredientSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = ("id", "name", "measurement_unit")
 
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ("id", "name", "color", "slug")
-
-
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
@@ -144,11 +117,14 @@ class RecipeShortSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ("id", "name", "image", "cooking_time")
 
+class RecipeShortSerializer(serializers.ModelSerializer):
+    """Короткое представление рецепта для подписок."""
+
+    class Meta:
+        model = Recipe
+        fields = ("id", "name", "image", "cooking_time")
 
 class RecipeSerializer(serializers.ModelSerializer):
-    tags = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Tag.objects.all(), required=False
-    )
     ingredients = RecipeIngredientReadSerializer(
         source="recipe_ingredients", many=True, read_only=True
     )
@@ -164,7 +140,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "author",
-            "tags",
             "ingredients",
             "ingredients_data",
             "is_favorited",
@@ -183,6 +158,13 @@ class RecipeSerializer(serializers.ModelSerializer):
             "pub_date",
         )
 
+    def validate_image(self, value):
+        if value in [None, ""]:
+            raise serializers.ValidationError(
+                {"image": ["Это поле обязательно."]}
+            )
+        return value
+    
     def to_internal_value(self, data):
         data = data.copy()
         if "ingredients" in data and "ingredients_data" not in data:
@@ -244,18 +226,14 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         ingredients = validated_data.pop("recipe_ingredients", [])
-        tags = validated_data.pop("tags", [])
         # Привязываем текущего пользователя как автора
         recipe = Recipe.objects.create(
             author=self.context["request"].user, **validated_data
         )
-        recipe.tags.set(tags)
         self._create_ingredients(recipe, ingredients)
         return recipe
 
     def update(self, instance, validated_data):
-        if "tags" in validated_data:
-            instance.tags.set(validated_data.pop("tags"))
         if "recipe_ingredients" in validated_data:
             instance.recipe_ingredients.all().delete()
             self._create_ingredients(
@@ -271,6 +249,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         rep["author"] = UserSerializer(
             instance.author, context=self.context
         ).data
+        if rep.get("image") is None:
+            rep["image"] = ""
         # удаляем из вывода поля, которых нет в responseSchema
         rep.pop("tags", None)
         rep.pop("pub_date", None)
