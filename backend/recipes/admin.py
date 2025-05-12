@@ -1,4 +1,5 @@
 from django.contrib import admin
+from users.models import Subscription
 
 from .models import (
     Favorite,
@@ -8,7 +9,6 @@ from .models import (
     ShoppingCart,
 )
 
-from users.models import Subscription
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient

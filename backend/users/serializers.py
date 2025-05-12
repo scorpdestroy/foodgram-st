@@ -1,11 +1,9 @@
 from django.shortcuts import get_object_or_404
-from recipes.models import Recipe
-from users.models import Subscription, User
-from recipes.serializers import RecipeShortSerializer
 from drf_extra_fields.fields import Base64ImageField
+from recipes.models import Recipe
+from recipes.serializers import RecipeShortSerializer
 from rest_framework import serializers
-
-from .models import User
+from .models import Subscription, User
 
 
 class AvatarSerializer(serializers.ModelSerializer):
@@ -39,6 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
         return Subscription.objects.filter(
             user=request.user, author=obj
         ).exists()
+
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="author.id")
@@ -87,6 +86,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
+
 
 class SubscriptionCreateSerializer(serializers.Serializer):
     author_id = serializers.IntegerField(write_only=True)

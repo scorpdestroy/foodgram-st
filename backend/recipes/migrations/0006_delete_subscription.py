@@ -6,11 +6,11 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0005_alter_favorite_recipe_alter_favorite_user_and_more'),
+        ("recipes", "0005_alter_favorite_recipe_alter_favorite_user_and_more"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='Subscription',
+            name="Subscription",
         ),
     ]

@@ -6,23 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0002_initial'),
+        ("recipes", "0002_initial"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='ingredient',
+            name="ingredient",
             unique_together=set(),
         ),
         migrations.RemoveField(
-            model_name='recipe',
-            name='tags',
+            model_name="recipe",
+            name="tags",
         ),
         migrations.AddConstraint(
-            model_name='ingredient',
-            constraint=models.UniqueConstraint(fields=('name', 'measurement_unit'), name='unique_ingredient'),
+            model_name="ingredient",
+            constraint=models.UniqueConstraint(
+                fields=("name", "measurement_unit"), name="unique_ingredient"
+            ),
         ),
         migrations.DeleteModel(
-            name='Tag',
+            name="Tag",
         ),
     ]

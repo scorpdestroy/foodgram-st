@@ -1,13 +1,15 @@
 from django.conf import settings
-from django.db import models
-from django.db.models import UniqueConstraint, CheckConstraint, Q, F
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.core.validators import EmailValidator
-from .constants import EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH, NAME_MAX_LENGTH
+from django.db import models
+from django.db.models import CheckConstraint, F, Q, UniqueConstraint
+
+from .constants import EMAIL_MAX_LENGTH, NAME_MAX_LENGTH, USERNAME_MAX_LENGTH
+
 
 class User(AbstractUser):
-    """Кастомный пользователь: логин — email, username обязателен для фронта."""
+    """Кастомный пользователь: логин — email,
+    username обязателен для фронта."""
 
     email = models.EmailField(
         "Адрес электронной почты",
@@ -47,29 +49,28 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.email})"
 
+
 class Subscription(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="subscriber",
-        verbose_name="подписчик"
+        verbose_name="подписчик",
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="subscribing",
-        verbose_name="автор"
+        verbose_name="автор",
     )
 
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["user", "author"],
-                name="unique_subscription"
+                fields=["user", "author"], name="unique_subscription"
             ),
             CheckConstraint(
-                check=~Q(user=F("author")),
-                name="prevent_self_subscription"
+                check=~Q(user=F("author")), name="prevent_self_subscription"
             ),
         ]
         verbose_name = "подписка"

@@ -1,6 +1,6 @@
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from drf_extra_fields.fields import Base64ImageField
 
 from .models import (
     Favorite,
@@ -9,6 +9,7 @@ from .models import (
     RecipeIngredient,
     ShoppingCart,
 )
+
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления рецепта в корзину."""
@@ -87,6 +88,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = ("id", "name", "measurement_unit")
 
+
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
@@ -117,12 +119,6 @@ class RecipeShortSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ("id", "name", "image", "cooking_time")
 
-class RecipeShortSerializer(serializers.ModelSerializer):
-    """Короткое представление рецепта для подписок."""
-
-    class Meta:
-        model = Recipe
-        fields = ("id", "name", "image", "cooking_time")
 
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientReadSerializer(
@@ -164,7 +160,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 {"image": ["Это поле обязательно."]}
             )
         return value
-    
+
     def to_internal_value(self, data):
         data = data.copy()
         if "ingredients" in data and "ingredients_data" not in data:

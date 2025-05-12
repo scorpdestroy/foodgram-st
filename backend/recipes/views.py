@@ -4,16 +4,12 @@ from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import (
-    AllowAny,
-    BasePermission,
-    IsAuthenticated,
-)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from .permissions import IsAuthor
 from .filters import NameSearchFilter, RecipeFilter
 from .models import Ingredient, Recipe, RecipeIngredient
+from .permissions import IsAuthor
 from .serializers import (
     FavoriteDeleteSerializer,
     FavoriteSerializer,
@@ -39,6 +35,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (NameSearchFilter,)  # поиск по началу названия
     search_fields = ["^name"]
     pagination_class = None
+
 
 class RecipeViewSet(viewsets.ModelViewSet):
 
@@ -74,7 +71,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         return Response({"short-link": link}, status=status.HTTP_200_OK)
 
-    def _toggle_relation(self, request, serializer_class, delete_serializer_class):
+    def _toggle_relation(
+        self, request, serializer_class, delete_serializer_class
+    ):
         recipe = self.get_object()
         user = request.user
 
@@ -85,7 +84,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            data = RecipeShortSerializer(recipe, context={"request": request}).data
+            data = RecipeShortSerializer(
+                recipe, context={"request": request}
+            ).data
             return Response(data, status=status.HTTP_201_CREATED)
 
         # DELETE
@@ -103,9 +104,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def favorite(self, request, pk=None):
         return self._toggle_relation(
-            request,
-            FavoriteSerializer,
-            FavoriteDeleteSerializer
+            request, FavoriteSerializer, FavoriteDeleteSerializer
         )
 
     @action(
@@ -115,9 +114,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def shopping_cart(self, request, pk=None):
         return self._toggle_relation(
-            request,
-            ShoppingCartSerializer,
-            ShoppingCartDeleteSerializer
+            request, ShoppingCartSerializer, ShoppingCartDeleteSerializer
         )
 
     @action(

@@ -11,9 +11,11 @@ class NameSearchFilter(SearchFilter):
     """
     То же самое, что SearchFilter, но ищет по параметру ?name=
     """
+
     search_param = "name"
 
     search_fields = ["^name"]
+
 
 class RecipeFilter(filters.FilterSet):
     # вместо NumberFilter используем ModelChoiceFilter для ForeignKey

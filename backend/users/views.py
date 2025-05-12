@@ -1,20 +1,17 @@
 from django.shortcuts import get_object_or_404
-from djoser.serializers import UserCreateSerializer
 from djoser.views import UserViewSet as DjoserUserViewSet
-from .models import Subscription
 from recipes.pagination import LimitPageNumberPagination
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from .models import User
+from .models import Subscription, User
 from .serializers import (
     AvatarSerializer,
     SubscriptionCreateSerializer,
     SubscriptionDeleteSerializer,
     SubscriptionSerializer,
-    UserSerializer,
 )
 
 
@@ -51,7 +48,9 @@ class UserViewSet(DjoserUserViewSet):
             )
             serializer.is_valid(raise_exception=True)
             sub = serializer.save()
-            out = SubscriptionSerializer(sub, context={"request": request}).data
+            out = SubscriptionSerializer(
+                sub, context={"request": request}
+            ).data
             return Response(out, status=status.HTTP_201_CREATED)
 
         # DELETE

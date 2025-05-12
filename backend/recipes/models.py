@@ -1,27 +1,22 @@
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.utils.text import slugify
 from users.models import User
-from django.conf import settings
+
 from .constants import NAME_MAX_LENGTH, UNIT_MAX_LENGTH
 
 
 class Ingredient(models.Model):
-    name = models.CharField(
-        "Название",
-        max_length=NAME_MAX_LENGTH
-    )
+    name = models.CharField("Название", max_length=NAME_MAX_LENGTH)
     measurement_unit = models.CharField(
-        "Ед. измерения",
-        max_length=UNIT_MAX_LENGTH
+        "Ед. измерения", max_length=UNIT_MAX_LENGTH
     )
 
     class Meta:
         ordering = ("name",)
         constraints = [
             models.UniqueConstraint(
-                fields=["name", "measurement_unit"],
-                name="unique_ingredient"
+                fields=["name", "measurement_unit"], name="unique_ingredient"
             )
         ]
         verbose_name = "ингредиент"
@@ -29,6 +24,7 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.measurement_unit})"
+
 
 class Recipe(models.Model):
     author = models.ForeignKey(
@@ -90,26 +86,23 @@ class RecipeIngredient(models.Model):
             f"{self.ingredient.measurement_unit}"
         )
 
+
 class UserRecipeRelation(models.Model):
     """
     Абстрактная модель: связь пользователь - рецепт
     Содержит только поля и единственный UniqueConstraint.
     """
+
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
-    recipe = models.ForeignKey(
-        'Recipe',
-        on_delete=models.CASCADE
-    )
+    recipe = models.ForeignKey("Recipe", on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_user_recipe'
+                fields=["user", "recipe"], name="unique_user_recipe"
             )
         ]
 
@@ -119,12 +112,10 @@ class Favorite(UserRecipeRelation):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="favorites"
+        related_name="favorites",
     )
     recipe = models.ForeignKey(
-        'Recipe',
-        on_delete=models.CASCADE,
-        related_name="favorited"
+        "Recipe", on_delete=models.CASCADE, related_name="favorited"
     )
 
     class Meta:
@@ -140,12 +131,10 @@ class ShoppingCart(UserRecipeRelation):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="shopping_cart"
+        related_name="shopping_cart",
     )
     recipe = models.ForeignKey(
-        'Recipe',
-        on_delete=models.CASCADE,
-        related_name="in_carts"
+        "Recipe", on_delete=models.CASCADE, related_name="in_carts"
     )
 
     class Meta:
