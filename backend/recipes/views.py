@@ -33,6 +33,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny]
     filter_backends = (NameSearchFilter,)  # поиск по началу названия
+    # Явное указание search_fields требуется для работы SearchFilter.
     search_fields = ["^name"]
     pagination_class = None
 

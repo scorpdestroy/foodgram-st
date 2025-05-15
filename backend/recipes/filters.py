@@ -14,8 +14,6 @@ class NameSearchFilter(SearchFilter):
 
     search_param = "name"
 
-    search_fields = ["^name"]
-
 
 class RecipeFilter(filters.FilterSet):
     # вместо NumberFilter используем ModelChoiceFilter для ForeignKey

@@ -76,9 +76,15 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
-        unique_together = ("recipe", "ingredient")
         verbose_name = "ингредиент рецепта"
         verbose_name_plural = "ингредиенты рецептов"
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["recipe", "ingredient"],
+                name="unique_recipe_ingredient",
+            )
+        ]
 
     def __str__(self):
         return (
@@ -108,19 +114,28 @@ class UserRecipeRelation(models.Model):
 
 
 class Favorite(UserRecipeRelation):
-    # Переопределяем related_name, чтобы вернуть recipe.favorited
+    """Избранный рецепт"""
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="favorites",
     )
     recipe = models.ForeignKey(
-        "Recipe", on_delete=models.CASCADE, related_name="favorited"
+        "Recipe",
+        on_delete=models.CASCADE,
     )
 
-    class Meta:
+    class Meta(UserRecipeRelation.Meta):
+        default_related_name = "favorited"
         verbose_name = "избранный рецепт"
         verbose_name_plural = "избранные рецепты"
+        # переопределяем constraint, чтобы избежать дублирования имён
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipe"], name="unique_favorite"
+            )
+        ]
 
     def __str__(self):
         return f"{self.user} ♥ {self.recipe}"
@@ -134,12 +149,19 @@ class ShoppingCart(UserRecipeRelation):
         related_name="shopping_cart",
     )
     recipe = models.ForeignKey(
-        "Recipe", on_delete=models.CASCADE, related_name="in_carts"
+        "Recipe",
+        on_delete=models.CASCADE,
     )
 
-    class Meta:
+    class Meta(UserRecipeRelation.Meta):
+        default_related_name = "in_carts"
         verbose_name = "рецепт в списке покупок"
         verbose_name_plural = "списки покупок"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipe"], name="unique_shopping_cart"
+            )
+        ]
 
     def __str__(self):
         return f"{self.user} → {self.recipe}"
