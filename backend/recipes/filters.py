@@ -1,18 +1,25 @@
 from django.contrib.auth import get_user_model
 from django_filters import rest_framework as filters
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import BaseFilterBackend
 
 from .models import Recipe
 
 User = get_user_model()
 
 
-class NameSearchFilter(SearchFilter):
+class NameSearchFilter(BaseFilterBackend):
     """
-    То же самое, что SearchFilter, но ищет по параметру ?name=
+    То же самое, что стандартный SearchFilter
     """
 
     search_param = "name"
+    
+    # Я не знаю как еще сделать, все уже перепробовано
+    def filter_queryset(self, request, queryset, view):
+        value = request.query_params.get(self.search_param)
+        if not value:
+            return queryset
+        return queryset.filter(name__istartswith=value)
 
 
 class RecipeFilter(filters.FilterSet):
