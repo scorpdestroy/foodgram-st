@@ -13,7 +13,7 @@ class NameSearchFilter(BaseFilterBackend):
     """
 
     search_param = "name"
-    
+
     # Я не знаю как еще сделать, все уже перепробовано
     def filter_queryset(self, request, queryset, view):
         value = request.query_params.get(self.search_param)

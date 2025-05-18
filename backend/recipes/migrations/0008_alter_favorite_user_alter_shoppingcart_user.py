@@ -9,7 +9,10 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("recipes", "0007_alter_favorite_options_alter_shoppingcart_options_and_more"),
+        (
+            "recipes",
+            "0007_alter_favorite_options_alter_shoppingcart_options_and_more",
+        ),
     ]
 
     operations = [
@@ -17,14 +20,16 @@ class Migration(migrations.Migration):
             model_name="favorite",
             name="user",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AlterField(
             model_name="shoppingcart",
             name="user",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
     ]

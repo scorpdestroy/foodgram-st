@@ -35,14 +35,16 @@ class Migration(migrations.Migration):
             model_name="favorite",
             name="recipe",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="recipes.recipe"
+                on_delete=django.db.models.deletion.CASCADE,
+                to="recipes.recipe",
             ),
         ),
         migrations.AlterField(
             model_name="shoppingcart",
             name="recipe",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="recipes.recipe"
+                on_delete=django.db.models.deletion.CASCADE,
+                to="recipes.recipe",
             ),
         ),
         migrations.AddConstraint(
@@ -54,7 +56,8 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="recipeingredient",
             constraint=models.UniqueConstraint(
-                fields=("recipe", "ingredient"), name="unique_recipe_ingredient"
+                fields=("recipe", "ingredient"),
+                name="unique_recipe_ingredient",
             ),
         ),
         migrations.AddConstraint(

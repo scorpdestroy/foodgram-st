@@ -6,7 +6,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("users", "0003_subscription_subscription_unique_subscription_and_more"),
+        (
+            "users",
+            "0003_subscription_subscription_unique_subscription_and_more",
+        ),
     ]
 
     operations = [
@@ -14,7 +17,9 @@ class Migration(migrations.Migration):
             model_name="user",
             name="email",
             field=models.EmailField(
-                max_length=254, unique=True, verbose_name="Адрес электронной почты"
+                max_length=254,
+                unique=True,
+                verbose_name="Адрес электронной почты",
             ),
         ),
     ]
